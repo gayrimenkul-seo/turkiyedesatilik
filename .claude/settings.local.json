@@ -8,7 +8,9 @@
       "Bash(python -m json.tool --no-ensure-ascii echo \"\")",
       "Bash(mkdir -p \"C:\\\\turkiyedesatilik\\\\turkiyedesatilik\\\\src\\\\app\\\\hakkimizda\")",
       "Bash(mkdir -p \"C:\\\\turkiyedesatilik\\\\turkiyedesatilik\\\\src\\\\app\\\\iletisim\")",
-      "Bash(npx prisma:*)"
+      "Bash(npx prisma:*)",
+      "Bash(npx tsc:*)",
+      "Bash(xxd \"C:/turkiyedesatilik/turkiyedesatilik/src/app/harita/page.tsx\")"
     ]
   }
 }
