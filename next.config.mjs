@@ -4,9 +4,7 @@ const nextConfig = {
     domains: ['turkiyedesatilik.com'],
     formats: ['image/avif', 'image/webp'],
   },
-  experimental: {
-    typedRoutes: true,
-  },
+  experimental: {},
 }
 
 export default nextConfig
