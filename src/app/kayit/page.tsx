@@ -1,5 +1,7 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 
 /* ─── Şifre güç hesaplama ───────────────────────────────── */
@@ -63,6 +65,7 @@ function validate(form: FormState): ErrorMap {
 
 /* ─── Sayfa ─────────────────────────────────────────────── */
 export default function KayitPage() {
+  const router = useRouter()
   const [form, setForm] = useState<FormState>({
     fullName: '', email: '', phone: '',
     password: '', passwordConfirm: '', kvkk: false,
@@ -73,6 +76,7 @@ export default function KayitPage() {
   const [showPwConfirm, setShowPwConfirm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
 
   const strength = getPasswordStrength(form.password)
 
@@ -87,7 +91,7 @@ export default function KayitPage() {
     if (touched[field]) setErrors(validate(updated))
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const errs = validate(form)
     setErrors(errs)
@@ -96,8 +100,39 @@ export default function KayitPage() {
     )
     setTouched(allTouched)
     if (Object.keys(errs).length > 0) return
+
     setSubmitting(true)
-    setTimeout(() => { setSubmitting(false); setSubmitted(true) }, 1400)
+    setApiError(null)
+
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name:     form.fullName,
+        email:    form.email,
+        phone:    form.phone || undefined,
+        password: form.password,
+      }),
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      setSubmitting(false)
+      setApiError(data.error ?? 'Kayıt sırasında bir hata oluştu.')
+      return
+    }
+
+    // Otomatik giriş yap
+    await signIn('credentials', {
+      email:    form.email,
+      password: form.password,
+      redirect: false,
+    })
+
+    setSubmitting(false)
+    setSubmitted(true)
+    router.push('/')
   }
 
   return (
@@ -373,6 +408,17 @@ export default function KayitPage() {
                   </p>
                 )}
               </div>
+
+              {/* API hatası */}
+              {apiError && (
+                <p style={{
+                  fontSize: 12, color: 'var(--terracotta)', fontWeight: 300,
+                  padding: '10px 14px', background: 'rgba(196,85,42,0.07)',
+                  borderRadius: 'var(--radius-sm)', border: '1px solid rgba(196,85,42,0.2)',
+                }}>
+                  {apiError}
+                </p>
+              )}
 
               {/* Submit */}
               <button

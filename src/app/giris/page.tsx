@@ -1,5 +1,7 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { siteConfig } from '@/lib/site-config'
 
@@ -32,11 +34,13 @@ function validate(form: FormState): Errors {
 
 /* ─── Sayfa ─────────────────────────────────────────────── */
 export default function GirisPage() {
+  const router = useRouter()
   const [form, setForm] = useState<FormState>({ email: '', password: '', remember: false })
   const [errors, setErrors] = useState<Errors>({})
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
   function touch(field: string) {
@@ -50,14 +54,30 @@ export default function GirisPage() {
     if (touched[field as string]) setErrors(validate(updated))
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const errs = validate(form)
     setErrors(errs)
     setTouched({ email: true, password: true })
     if (Object.keys(errs).length > 0) return
+
     setSubmitting(true)
-    setTimeout(() => { setSubmitting(false); setSubmitted(true) }, 1400)
+    setAuthError(null)
+
+    const result = await signIn('credentials', {
+      email:    form.email,
+      password: form.password,
+      redirect: false,
+    })
+
+    setSubmitting(false)
+
+    if (result?.error) {
+      setAuthError('E-posta adresi veya şifre hatalı.')
+    } else {
+      setSubmitted(true)
+      router.push('/')
+    }
   }
 
   return (
@@ -200,6 +220,7 @@ export default function GirisPage() {
               {/* Google ile giriş */}
               <button
                 type="button"
+                onClick={() => signIn('google', { callbackUrl: '/' })}
                 style={{
                   width: '100%', padding: '11px 16px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
@@ -295,6 +316,17 @@ export default function GirisPage() {
                   Şifremi unuttum
                 </Link>
               </div>
+
+              {/* Auth hatası */}
+              {authError && (
+                <p style={{
+                  fontSize: 12, color: 'var(--terracotta)', fontWeight: 300,
+                  padding: '10px 14px', background: 'rgba(196,85,42,0.07)',
+                  borderRadius: 'var(--radius-sm)', border: '1px solid rgba(196,85,42,0.2)',
+                }}>
+                  {authError}
+                </p>
+              )}
 
               {/* Submit */}
               <button

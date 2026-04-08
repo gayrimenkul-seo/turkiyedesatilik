@@ -80,7 +80,7 @@ async function main() {
       where:  { userId: userAli.id },
       update: {},
       create: {
-        name:     userAli.name,
+        name:     userAli.name ?? '',
         phone:    userAli.phone!,
         email:    userAli.email,
         userId:   userAli.id,
@@ -91,7 +91,7 @@ async function main() {
       where:  { userId: userMurat.id },
       update: {},
       create: {
-        name:     userMurat.name,
+        name:     userMurat.name ?? '',
         phone:    userMurat.phone!,
         email:    userMurat.email,
         userId:   userMurat.id,
