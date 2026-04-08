@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(curl:*)",
+      "Bash(npm install:*)",
+      "Bash(python -m json.tool --no-ensure-ascii)",
+      "Bash(python -m json.tool --no-ensure-ascii echo \"\")",
+      "Bash(mkdir -p \"C:\\\\turkiyedesatilik\\\\turkiyedesatilik\\\\src\\\\app\\\\hakkimizda\")",
+      "Bash(mkdir -p \"C:\\\\turkiyedesatilik\\\\turkiyedesatilik\\\\src\\\\app\\\\iletisim\")",
+      "Bash(npx prisma:*)"
+    ]
+  }
+}

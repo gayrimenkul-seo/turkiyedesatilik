@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design Tokens ─── */
+:root {
+  --sand: #F5F0E8;
+  --sand-dark: #EDE5D4;
+  --obsidian: #0F1010;
+  --slate: #1C2027;
+  --aegean: #1B4F6B;
+  --aegean-light: #2A6F94;
+  --terracotta: #C4552A;
+  --terra-light: #D4724A;
+  --gold: #B8923A;
+  --gold-light: #D4A84E;
+  --mist: #8B9098;
+  --cream: #FDFCFA;
+
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
+
+  --radius-sm: 2px;
+  --radius: 3px;
+  --radius-md: 8px;
+}
+
+/* ─── Base ─── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--sand);
+  color: var(--obsidian);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* Noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+}
+
+/* ─── Custom Cursor ─── */
+#cursor {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 9999;
+  width: 10px; height: 10px;
+  background: var(--terracotta);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: transform 0.15s ease, background 0.2s;
+  mix-blend-mode: multiply;
+}
+
+#cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 9998;
+  width: 36px; height: 36px;
+  border: 1px solid var(--terracotta);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: transform 0.35s ease, width 0.3s, height 0.3s, opacity 0.3s;
+  opacity: 0.5;
+}
+
+body:has(a:hover) #cursor,
+body:has(button:hover) #cursor {
+  transform: translate(-50%, -50%) scale(2.5);
+  background: var(--gold);
+}
+
+body:has(a:hover) #cursor-ring,
+body:has(button:hover) #cursor-ring {
+  width: 56px; height: 56px;
+  opacity: 0.3;
+}
+
+/* ─── Typography ─── */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* ─── Scroll Reveal ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Animations ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(61,190,124,0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(61,190,124,0); }
+}
+
+.animate-fade-up     { animation: fadeUp 0.8s ease forwards; }
+.animate-fade-in     { animation: fadeIn 1.2s ease forwards; }
+.animate-slide-right { animation: slideInRight 0.9s ease forwards; }
+.animate-pulse-dot   { animation: pulseDot 2s infinite; }
+
+/* ─── Buttons ─── */
+.btn-primary {
+  @apply inline-block bg-obsidian text-cream px-9 py-4 text-[13px] font-medium
+    tracking-[0.07em] uppercase no-underline transition-all duration-200
+    hover:bg-terracotta hover:-translate-y-px;
+  border-radius: var(--radius-sm);
+}
+
+.btn-outline {
+  @apply inline-flex items-center gap-2.5 border border-obsidian text-obsidian
+    px-9 py-4 text-[13px] font-medium tracking-[0.07em] uppercase no-underline
+    transition-all duration-200 hover:bg-obsidian hover:text-cream;
+  border-radius: var(--radius-sm);
+}
+
+.btn-ghost {
+  @apply text-obsidian text-[13px] font-normal tracking-[0.06em] no-underline
+    flex items-center gap-2 border-b border-obsidian pb-0.5
+    transition-colors duration-200 hover:text-terracotta hover:border-terracotta;
+}
+
+.btn-white {
+  @apply inline-block bg-cream text-terracotta px-10 py-4 text-[13px] font-medium
+    tracking-[0.07em] uppercase no-underline transition-all duration-200
+    hover:bg-sand hover:-translate-y-px;
+  border-radius: var(--radius-sm);
+}
+
+.btn-ghost-white {
+  @apply inline-block bg-transparent text-cream px-10 py-4 border text-[13px] font-normal
+    tracking-[0.07em] uppercase no-underline transition-all duration-200
+    hover:bg-white/10;
+  border-color: rgba(255,255,255,0.4);
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Section Labels ─── */
+.section-label {
+  @apply text-[10px] font-medium tracking-[0.2em] uppercase text-terracotta block mb-4;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  @apply text-obsidian font-light leading-[1.1] mb-12;
+  font-size: clamp(32px, 4vw, 52px);
+}
+
+.section-title em {
+  @apply not-italic text-aegean;
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 768px) {
+  body { cursor: auto; }
+  #cursor, #cursor-ring { display: none; }
+}

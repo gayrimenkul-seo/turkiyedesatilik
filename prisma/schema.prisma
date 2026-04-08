@@ -1,0 +1,242 @@
+// ─── Prisma Schema — Türkiye'de Satılık ───────────────────────────────
+// Veritabanı: PostgreSQL 15+
+// npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────
+enum ListingType {
+  SALE
+  RENT
+  PROJECT
+}
+
+enum PropertyType {
+  APARTMENT
+  VILLA
+  LAND
+  COMMERCIAL
+}
+
+enum ViewType {
+  SEA
+  CITY
+  NATURE
+  LAKE
+  MOUNTAIN
+  NONE
+}
+
+enum ListingStatus {
+  ACTIVE
+  PASSIVE
+  SOLD
+  RENTED
+  DRAFT
+}
+
+enum Currency {
+  TRY
+  EUR
+  USD
+}
+
+enum UserRole {
+  BUYER
+  AGENT
+  OFFICE_OWNER
+  ADMIN
+}
+
+enum OfficeStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────
+
+model User {
+  id              String   @id @default(cuid())
+  name            String
+  email           String   @unique
+  phone           String?
+  avatar          String?
+  passwordHash    String?
+  role            UserRole @default(BUYER)
+  preferredLocale String   @default("tr")
+  savedListings   String[] // listing id'leri
+
+  agent  Agent?
+  leads  Lead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Office {
+  id       String       @id @default(cuid())
+  slug     String       @unique
+  name     String
+  logo     String?
+  phone    String
+  email    String
+  address  String
+  city     String
+  district String?
+  lat      Float?
+  lng      Float?
+
+  licenseNo   String       @unique  // Bakanlık yetki belgesi no
+  isVerified  Boolean      @default(false)
+  status      OfficeStatus @default(PENDING)
+
+  agents   Agent[]
+  listings Listing[]
+  leads    Lead[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("offices")
+}
+
+model Agent {
+  id     String  @id @default(cuid())
+  name   String
+  avatar String?
+  phone  String
+  email  String  @unique
+
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id])
+
+  officeId String
+  office   Office @relation(fields: [officeId], references: [id])
+
+  listings Listing[]
+
+  createdAt DateTime @default(now())
+
+  @@map("agents")
+}
+
+model Listing {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  description String        @db.Text
+  titleDe     String?       // Almanca başlık
+  descDe      String?       @db.Text
+
+  listingType  ListingType
+  propertyType PropertyType
+  status       ListingStatus @default(DRAFT)
+
+  price      Float
+  currency   Currency @default(TRY)
+  pricePerSqm Float?
+
+  city         String
+  district     String
+  neighborhood String?
+  address      String?
+  lat          Float?
+  lng          Float?
+
+  sqm          Float
+  rooms        String?   // "3+1"
+  bathrooms    Int?
+  floors       Int?
+  buildingFloor Int?
+  age          Int?      // yıl
+
+  viewType    ViewType?
+  hasPool     Boolean @default(false)
+  hasGarage   Boolean @default(false)
+  hasGarden   Boolean @default(false)
+  isFurnished Boolean @default(false)
+
+  isRadar Boolean @default(false)  // öne çıkan
+
+  images  ListingImage[]
+  agentId String
+  agent   Agent          @relation(fields: [agentId], references: [id])
+  officeId String
+  office  Office         @relation(fields: [officeId], references: [id])
+  leads   Lead[]
+
+  viewCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([city, district])
+  @@index([listingType, status])
+  @@index([isRadar])
+  @@map("listings")
+}
+
+model ListingImage {
+  id        String  @id @default(cuid())
+  url       String
+  thumbUrl  String
+  alt       String
+  order     Int     @default(0)
+
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("listing_images")
+}
+
+model Lead {
+  id              String     @id @default(cuid())
+  name            String
+  email           String
+  phone           String?
+  message         String     @db.Text
+  preferredLocale String     @default("tr")
+  status          LeadStatus @default(NEW)
+
+  listingId String?
+  listing   Listing? @relation(fields: [listingId], references: [id])
+  officeId  String?
+  office    Office?  @relation(fields: [officeId], references: [id])
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("leads")
+}
+
+model Region {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  city        String
+  district    String?
+  description String? @db.Text
+  image       String?
+  lat         Float
+  lng         Float
+  order       Int     @default(0)
+
+  @@map("regions")
+}
